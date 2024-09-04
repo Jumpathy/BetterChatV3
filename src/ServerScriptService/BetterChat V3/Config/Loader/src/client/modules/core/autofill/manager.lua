@@ -5,9 +5,22 @@
 local runService = game:GetService("RunService")
 local heartbeat = runService.Heartbeat
 
-return function(api,autofills,box,environment)
+return function(api,fills,box,environment)
 	local justReplaced
 	
+	local autofills = {}
+	
+	for _,autofill in pairs(fills) do
+		if(autofill.priority == nil) then
+			autofill.priority = 3
+		end
+		table.insert(autofills,autofill)
+	end
+	
+	table.sort(autofills,function(autofill1,autofill2)
+		return autofill1.priority < autofill2.priority
+	end)
+				
 	local security = function(fill)
 		if(fill.security == "internal") then -- external autofills can also use this, 
 			-- I just keep it on the low because it gives them internal API access and it

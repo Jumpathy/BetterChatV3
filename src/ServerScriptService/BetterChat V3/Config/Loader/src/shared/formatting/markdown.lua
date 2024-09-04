@@ -23,7 +23,7 @@ return function(rich_text,config)
 	if enabled.Fonts == nil then
 		enabled.Fonts = true
 	end
-	
+		
 	local parse_color = function(color)
 		color = color:gsub(" ","") -- remove spaces
 		local default = Color3.fromRGB(255,255,255)

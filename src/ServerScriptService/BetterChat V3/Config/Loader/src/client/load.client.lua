@@ -70,6 +70,9 @@ if(currentPlatform ~= "Console") then
 		local chatbox = chatbarContainer:WaitForChild("Container"):WaitForChild("Box"):WaitForChild("Input")
 		local config = network:invoke("requestConfig")
 		
+		local mutelist = {}
+		local canMuteSelf = false
+		
 		local environment = {
 			utility = require(core:WaitForChild("utility")),
 			localization = require(core:WaitForChild("localization"))(),
@@ -87,9 +90,17 @@ if(currentPlatform ~= "Console") then
 			betterchat_shared = betterchat_shared,
 			onEmoji = signal.new(),
 			interceptions = {},
-			addToCache = {}
+			addToCache = {},
+			mutelist = mutelist
 		}
 		
+		if environment.config.DebugMode then
+			environment.debugging = true
+			function environment:debugLog(...)
+				print("[BetterChat Debug Log]",...)
+			end
+		end
+				
 		environment.config.UI.ColorOptions = environment.config.UI.ColorOptions or {
 			ChatbarColor = Color3.fromRGB(255,255,255),
 			Buttons = {
@@ -417,10 +428,6 @@ if(currentPlatform ~= "Console") then
 			}
 		end
 		
-		local mutelist = {}
-		local canMuteSelf = true
-		environment.mutelist = mutelist
-		
 		local createNewMessage = function(data) -- this function initiates every message ever sent :eyes:
 			if(mutelist[data.senderId]) then
 				return
@@ -536,7 +543,7 @@ if(currentPlatform ~= "Console") then
 			for _,data in pairs(received.messages) do
 				if debugMode then
 					local current = batchCount
-					print("[BetterChat]: Creating",data.id,"for batch",current)
+					environment:debugLog("Creating",data.id,"for batch",current)
 				end
 				data = environment.processData(data,"chat")
 				task.spawn(function()

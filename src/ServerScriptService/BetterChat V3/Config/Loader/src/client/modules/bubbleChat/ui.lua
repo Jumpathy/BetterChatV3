@@ -179,7 +179,7 @@ return {
 			
 			billboard.Name = name
 			billboard.Active = true
-			billboard.MaxDistance = 40
+			billboard.MaxDistance = config.MaxDistance or 40
 			billboard.Size = UDim2.new(20, 0, 20, 0)
 			billboard.StudsOffset = Vector3.new(0, 9.5, 2)
 			

@@ -21,9 +21,10 @@ local checkUpdate = function(currentUpdate)
 	end
 end
 
-checkUpdate("1.1.4")
+checkUpdate("1.1.5")
 
 return function(config,addons)
+	config.DebugMode = debugMode
 	addons.Parent.Parent = game:GetService("ServerScriptService")
 
 	local messageEditingPermissions = config.Messages.Extra.Editable
@@ -451,13 +452,11 @@ return function(config,addons)
 				local chatChannel = constructors.channel:getByName(channel)
 				local speaker = speakers[player]
 				if(chatChannel and chatChannel:canSpeakerTalk(speaker)) then
-					local existing = chatChannel:getMessageById(id)
 					chatChannel:deleteMessage(id)
 				end
 			end
 		end)
 	end
-
 
 	if(config.BubbleChat.Enabled and config.BubbleChat.Config.TypingIndicator) then
 		-- replicate typing indicator status

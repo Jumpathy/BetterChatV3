@@ -453,6 +453,10 @@ return function(environment)
 		for _,child in pairs(autofillListFolder:GetChildren()) do
 			task.spawn(onAutofill,child)
 		end
+		
+		environment.utility.childAdded(environment.addons:WaitForChild("Autofills"),function(child)
+			child.Parent = autofillListFolder
+		end)
 
 		autofillManager(autofill,autofillsList,chatbox,environment)
 

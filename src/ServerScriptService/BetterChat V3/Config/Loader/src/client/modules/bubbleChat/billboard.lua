@@ -18,8 +18,14 @@ local onDescendant = function(object,callback)
 end
 
 function billboard.init(config,network,environment)
-	local httpService = game:GetService("HttpService")
-
+	local httpService = game:GetService("HttpService")	
+	config.Config.Offsets = config.Config.Offsets or {
+		OtherPlayers = Vector3.new(0,10.5,0.1),
+		LocalPlayer = Vector3.new(0,9.5,2)
+	}
+	
+	local offsets = config.Config.Offsets 
+	
 	environment.holstered = {}
 	local ui = require(script.Parent:WaitForChild("ui")).init(config)
 	local stackModule = require(script.Parent:WaitForChild("stack"))(environment).init(config)
@@ -50,9 +56,15 @@ function billboard.init(config,network,environment)
 
 	camera.Changed:Connect(function()
 		for gui,billboard in pairs(billboardData) do
-			if gui:GetFullName() == gui.Name or billboard.adornee:GetFullName() == billboard.adornee.Name then
+			if gui:GetFullName() == gui.Name then
+				if environment.debugging then
+					environment:debugLog("Billboard",billboard,"has ceased to exist")
+				end
 				billboardData[gui] = nil
 			else
+				if(billboard.adornee and not gui.Adornee) then
+					gui.Adornee = billboard.adornee
+				end
 				local result = (billboard.adornee.Position - camera.CFrame.Position)
 				if(result.magnitude < gui.MaxDistance) then
 					local vector,inViewport = camera:WorldToViewportPoint(billboard.adornee.Position)
@@ -76,8 +88,12 @@ function billboard.init(config,network,environment)
 		local link = function(signal)
 			table.insert(connections,signal)
 		end
+		
 		link(player.Changed:Connect(function()
 			if(player:GetFullName() == player.Name) then
+				if environment.debugging then
+					environment:debugLog(player,"has been completely removed")
+				end
 				for _,connection in pairs(connections) do
 					connection:Disconnect()
 				end
@@ -90,8 +106,8 @@ function billboard.init(config,network,environment)
 			gui = ui.billboard.new(tostring(player.UserId),player)
 			gui.Parent = containerGui
 			gui.Adornee = character:WaitForChild("Head")
-			gui.StudsOffset = Vector3.new(0,isLocalPlayer and 9.5 or 10.5,isLocalPlayer and 2 or 0.1)
-
+			gui.StudsOffset = isLocalPlayer and offsets.LocalPlayer or offsets.OtherPlayers
+			
 			typingIndicator = ui.typingIndicator.new(gui.Container)
 			typingIndicator.Visible = false
 			stack = stackModule.new(gui)
@@ -154,6 +170,9 @@ function billboard.init(config,network,environment)
 		end
 
 		local onRemoving = function(character)
+			if environment.debugging then
+				environment:debugLog(player.Name,"is unloading their character, now disconnecting events")
+			end
 			if(linked[character]) then
 				linked[character]:Destroy()
 				linked[character] = nil
@@ -203,6 +222,7 @@ function billboard.init(config,network,environment)
 				stack:remove(environment.betterchatv3bubbles[data.guid],true)
 				stack:fade(environment.betterchatv3bubbles[data.guid],0)					
 				if not data.deleted then
+					local gui = linked[data.player.Character]					
 					local text = data.message .. environment.editedStamp
 					local guid = data.guid
 
@@ -229,6 +249,12 @@ function billboard.init(config,network,environment)
 		end))
 
 		link(network.onClientEvent("receiveMessage",function(data)
+			if environment.debugging and data.is_singular then
+				local msg = data.messages[1]
+				if(msg.player == player) then
+					environment:debugLog("received",msg.id,"from",msg.player,"transmitting now..")
+				end
+			end
 			if(data.is_singular and data.messages[1].player == player and (environment.bubbleChatEnabled) and player.Character) then
 				data.messages[1] = environment.processData(data.messages[1],"bubbleChat")
 				local markdownEnabled = data.messages[1]["markdownEnabled"]
@@ -236,6 +262,9 @@ function billboard.init(config,network,environment)
 				local msg = data["message"]
 				if(not environment.mutelist[player.UserId]) then
 					local text = markdownEnabled and environment.richText:markdown(msg) or environment.richText:escape(msg)
+					if environment.debugging then
+						environment:debugLog(data.id,"has",text,"as contents")
+					end
 					if(data.customEmojis) then
 						local sample = ui.bubble.new(text,gui.Container)
 						text = environment:processEmojis(sample.Label,data,msg)
@@ -244,6 +273,9 @@ function billboard.init(config,network,environment)
 					local bubble = ui.bubble.new(text,gui.Container)
 					environment.betterchatv3bubbles[data.guid] = bubble
 					environment.stacks[data.guid] = stack
+					if environment.debugging then
+						environment:debugLog(data.id,"is being pushed to the stack")
+					end
 					stack:push(
 						bubble,false,data["guid"]						
 					)

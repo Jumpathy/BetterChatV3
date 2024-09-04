@@ -186,7 +186,7 @@ return {
 		BlockedUserNotifier = true, --> Place a system message in the chat when a user is blocked?
 	},
 	Messages = {
-		BlacklistEnabled = true, --> Do you want to enact a custom word blacklist?
+		BlacklistEnabled = false, --> Do you want to enact a custom word blacklist?
 		BlacklistCanUseDatastores = true, --> Enabling this allows API methods such as :blacklistWord(word <string>,state <bool>) which will save in live time
 		BlacklistedWords = {}, --> Will be filtered automatically
 		FilterProcessingCharacter = "_", --> What messages are replaced with before being properly filtered and distributed (whilst pending)
@@ -219,7 +219,7 @@ return {
 			Strikethrough = true,
 			Colored = true,
 			Outlines = true,
-			Fonts = true
+			Fonts = false
 		},
 		MessageGrouping = {
 			Enabled = true, --> Merge messages when sent by the same user back to back?
@@ -259,6 +259,11 @@ return {
 			BubbleBackgroundColor = Color3.fromRGB(20,20,20), --> The chat bubble's background color.
 			BubbleTextColor = Color3.fromRGB(255,255,255), --> The chat bubble's text color.
 			Roundness = 8, --> The chat bubble's roundness in pixels
+			MaxDistance = 40, --> How far away the bubble chat can be seen from?
+			Offsets = { --> How high above the player's head the billboard UI for the chat bubble is 
+				OtherPlayers = Vector3.new(0,10.5,0.1),
+				LocalPlayer = Vector3.new(0,9.5,2)
+			},
 		}
 	},
 	SettingsMenu = { --> Settings for the chat's interface

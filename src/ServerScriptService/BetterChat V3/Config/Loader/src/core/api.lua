@@ -185,54 +185,58 @@ return function(constructors,wrap,config,callbacks,permission)
 	end)
 	
 	constructors.message.preprocess = function(msg)
-		local function normalizeText(text)
-			return text:lower():gsub("%s+", ""):gsub("%p", "")
-		end
-
-		local blacklist = getBlacklisted()
-		local normalizedMsg = normalizeText(msg)
-
-		for _, word in pairs(blacklist) do
-			local normalizedWord = normalizeText(word)
-			local pattern = escapePattern(normalizedWord)
-
-			while true do
-				local startPos, endPos = normalizedMsg:find(pattern)
-				if not startPos then break end
-
-				local originalStart = 1
-				local normalizedCount = 0
-				for i = 1, #msg do
-					local char = msg:sub(i, i)
-					if normalizeText(char) ~= "" then
-						normalizedCount = normalizedCount + 1
-					end
-					if normalizedCount == startPos then
-						originalStart = i
-						break
-					end
-				end
-
-				local originalEnd = originalStart
-				normalizedCount = 0
-				for i = originalStart, #msg do
-					local char = msg:sub(i, i)
-					if normalizeText(char) ~= "" then
-						normalizedCount = normalizedCount + 1
-					end
-					if normalizedCount == endPos - startPos + 1 then
-						originalEnd = i
-						break
-					end
-				end
-
-				local replacement = string.rep("#", originalEnd - originalStart + 1)
-				msg = msg:sub(1, originalStart - 1) .. replacement .. msg:sub(originalEnd + 1)
-				normalizedMsg = normalizedMsg:sub(1, startPos - 1) .. string.rep("#", endPos - startPos + 1) .. normalizedMsg:sub(endPos + 1)
+		if not blacklistEnabled then
+			return msg
+		else
+			local function normalizeText(text)
+				return text:lower():gsub("%s+", ""):gsub("%p", "")
 			end
-		end
 
-		return msg
+			local blacklist = getBlacklisted()
+			local normalizedMsg = normalizeText(msg)
+
+			for _, word in pairs(blacklist) do
+				local normalizedWord = normalizeText(word)
+				local pattern = escapePattern(normalizedWord)
+
+				while true do
+					local startPos, endPos = normalizedMsg:find(pattern)
+					if not startPos then break end
+
+					local originalStart = 1
+					local normalizedCount = 0
+					for i = 1, #msg do
+						local char = msg:sub(i, i)
+						if normalizeText(char) ~= "" then
+							normalizedCount = normalizedCount + 1
+						end
+						if normalizedCount == startPos then
+							originalStart = i
+							break
+						end
+					end
+
+					local originalEnd = originalStart
+					normalizedCount = 0
+					for i = originalStart, #msg do
+						local char = msg:sub(i, i)
+						if normalizeText(char) ~= "" then
+							normalizedCount = normalizedCount + 1
+						end
+						if normalizedCount == endPos - startPos + 1 then
+							originalEnd = i
+							break
+						end
+					end
+
+					local replacement = string.rep("#", originalEnd - originalStart + 1)
+					msg = msg:sub(1, originalStart - 1) .. replacement .. msg:sub(originalEnd + 1)
+					normalizedMsg = normalizedMsg:sub(1, startPos - 1) .. string.rep("#", endPos - startPos + 1) .. normalizedMsg:sub(endPos + 1)
+				end
+			end
+
+			return msg
+		end
 	end
 	
 	api.chatted = chattedEvent
