@@ -128,12 +128,21 @@ return function(root,chatUi)
 	end
 
 	local invisibleChars = {
-		utf8.char(0x200A)
+		utf8.char(0x200A),
+		" "
 	}
+	
+	local getTextSizeNew = function(text,fontSize,font)
+		local params = Instance.new("GetTextBoundsParams")
+		params.Font = Font.fromEnum(font)
+		params.Size = fontSize
+		params.Text = text
+		return textService:GetTextBoundsAsync(params)
+	end
 	
 	local testCharSupport = function(char, font, fontSize)
 		local success, result = pcall(function()
-			return textService:GetTextSize(char, fontSize, font, Vector2.new(1000, 1000)).X > 0
+			return getTextSizeNew(char, fontSize, font, Vector2.new(1000, 1000)).X > 0
 		end)
 		return success and result
 	end
@@ -146,7 +155,7 @@ return function(root,chatUi)
 		for _, char in ipairs(list) do
 			if testCharSupport(char, font, fontSize) then
 				table.insert(supportedChars, char)
-				charWidths[char] = textService:GetTextSize(char, fontSize, font, Vector2.new(1000, 1000)).X
+				charWidths[char] = getTextSizeNew(char, fontSize, font, Vector2.new(1000, 1000)).X
 			end
 		end
 
@@ -156,7 +165,7 @@ return function(root,chatUi)
 
 		local result = ""
 		local currentWidth = 0
-
+		
 		while currentWidth < targetWidth do
 			local bestChar = supportedChars[1]
 			local bestDiff = math.huge
@@ -189,7 +198,6 @@ return function(root,chatUi)
 		local text = object.Text
 		text = text:gsub(spacing,"<>")
 				
-		local replacement = getSpacing(object.Font,object.TextSize,object.TextSize,2)		
 		local response = ""
 		if(object.Text:find("<")) then
 			response = splitXmlAndText(text)

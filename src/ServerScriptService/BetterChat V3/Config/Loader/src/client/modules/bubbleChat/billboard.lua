@@ -55,29 +55,31 @@ function billboard.init(config,network,environment)
 	end
 
 	camera.Changed:Connect(function()
-		for gui,billboard in pairs(billboardData) do
-			if gui:GetFullName() == gui.Name then
-				if environment.debugging then
-					environment:debugLog("Billboard",billboard,"has ceased to exist")
-				end
-				billboardData[gui] = nil
-			else
-				if(billboard.adornee and not gui.Adornee) then
-					gui.Adornee = billboard.adornee
-				end
-				local result = (billboard.adornee.Position - camera.CFrame.Position)
-				if(result.magnitude < gui.MaxDistance) then
-					local vector,inViewport = camera:WorldToViewportPoint(billboard.adornee.Position)
-					local onScreen = inViewport and vector.Z > 0
-					if(onScreen) then
-						local raycastResult = workspace:Raycast(camera.CFrame.Position,result,billboard.params)
-						gui.AlwaysOnTop = not raycastResult
-					else
-						gui.AlwaysOnTop = false
+		pcall(function()
+			for gui,billboard in pairs(billboardData) do
+				if gui:GetFullName() == gui.Name then
+					if environment.debugging then
+						environment:debugLog("Billboard",billboard,"has ceased to exist")
+					end
+					billboardData[gui] = nil
+				else
+					if(billboard.adornee and not gui.Adornee) then
+						gui.Adornee = billboard.adornee
+					end
+					local result = (billboard.adornee.Position - camera.CFrame.Position)
+					if(result.magnitude < gui.MaxDistance) then
+						local vector,inViewport = camera:WorldToViewportPoint(billboard.adornee.Position)
+						local onScreen = inViewport and vector.Z > 0
+						if(onScreen) then
+							local raycastResult = workspace:Raycast(camera.CFrame.Position,result,billboard.params)
+							gui.AlwaysOnTop = not raycastResult
+						else
+							gui.AlwaysOnTop = false
+						end
 					end
 				end
 			end
-		end
+		end)
 	end)
 
 	function billboard:holster(player)

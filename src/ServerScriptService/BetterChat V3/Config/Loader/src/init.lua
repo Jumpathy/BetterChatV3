@@ -21,7 +21,7 @@ local checkUpdate = function(currentUpdate)
 	end
 end
 
-checkUpdate("1.1.5")
+checkUpdate("1.1.6")
 
 return function(config,addons)
 	config.DebugMode = debugMode

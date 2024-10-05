@@ -5,7 +5,9 @@
 local command = {}
 command.name = "e"
 command.aliases = {"emote"}
-command.call = function(message)
+command.security = "internal"
+
+command.call = function(message,environment)
 	local defaultEmotes = {
 		wave = true,point = true,dance = true,
 		dance2 = true,dance3 = true,laugh = true,
@@ -21,8 +23,8 @@ command.call = function(message)
 		return nil
 	end
 
-	local systemMessage = function(message)
-		--print("system message",message)
+	local systemMessage = function(localizationKey)
+		environment:sendSystemMessage(environment.localization:localize(localizationKey))
 	end
 
 	local emoteName = getEmoteName()
@@ -32,36 +34,36 @@ command.call = function(message)
 
 	local character = game:GetService("Players").LocalPlayer.Character
 	if(not character) then
-		systemMessage("You can't use emotes right now.")
+		systemMessage("InGame.Chat.Response.EmotesTemporarilyUnavailable")
 		return
 	end
 
 	local animateScript = character:FindFirstChild("Animate")
 	if(not animateScript) then
-		systemMessage("You can't use emotes here.")
+		systemMessage("InGame.Chat.Response.EmotesNotSupported")
 		return
 	end
 
 	local playEmoteBindable = animateScript:FindFirstChild("PlayEmote")
 	if(not playEmoteBindable) then
-		systemMessage("You can't use emotes here.")
+		systemMessage("InGame.Chat.Response.EmotesNotSupported")
 		return
 	end
 
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if(not humanoid) then
-		systemMessage("You can't use emotes right now.")
+		systemMessage("InGame.Chat.Response.EmotesTemporarilyUnavailable")
 		return
 	end
 
 	if(humanoid.RigType ~= Enum.HumanoidRigType.R15) then
-		systemMessage("Only R15 avatars can use emotes.")
+		systemMessage("InGame.Chat.Response.EmotesWrongAvatarType")
 		return
 	end
 
 	local humanoidDescription = humanoid:FindFirstChildOfClass("HumanoidDescription")
 	if(not humanoidDescription) then
-		systemMessage("You can't use emotes here.")
+		systemMessage("InGame.Chat.Response.EmotesNotSupported")
 		return true
 	end
 
@@ -81,7 +83,7 @@ command.call = function(message)
 
 	emoteName = index[emoteName:lower()]
 	if(not emoteName) then
-		systemMessage("You can't use that emote.")
+		systemMessage("InGame.Chat.Response.EmoteNotAvailable")
 		return
 	end
 
@@ -89,11 +91,10 @@ command.call = function(message)
 		local ok,didPlay = pcall(function() 
 			return humanoid:PlayEmote(emoteName)
 		end)
-
 		if(not ok) then
-			systemMessage("You can't use emotes here.")
+			systemMessage("InGame.Chat.Response.EmotesNotSupported")
 		elseif(not didPlay) then
-			systemMessage("You can't use emotes right now.")
+			systemMessage("InGame.Chat.Response.EmotesTemporarilyUnavailable")
 		end
 	end)()
 end

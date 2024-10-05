@@ -17,12 +17,13 @@ return function(utility,config,messageEditingEnabled,permission,richText,signal)
 	end
 
 	local deepCopy;
-	deepCopy = function(original)
+	deepCopy = function(original,depth)
+		depth = depth or 0
 		local copy
 		if type(original) == "table" then
 			copy = {}
 			for key, value in next, original, nil do
-				copy[deepCopy(key)] = deepCopy(value)
+				copy[deepCopy(key)] = deepCopy(value,depth + 1)
 			end
 		else
 			copy = original
@@ -144,7 +145,6 @@ return function(utility,config,messageEditingEnabled,permission,richText,signal)
 	function message.edit(message,newText)
 		if(not message.data.edits) then
 			message.data.edits = 0
-			message.originalFilter = message
 		end
 		if(message.data.isMeCommand) then
 			newText = "/me " .. newText

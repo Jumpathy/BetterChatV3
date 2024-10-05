@@ -429,7 +429,7 @@ if(currentPlatform ~= "Console") then
 		end
 		
 		local createNewMessage = function(data) -- this function initiates every message ever sent :eyes:
-			if(mutelist[data.senderId]) then
+			if(mutelist[data.senderId] or (data.channelFrom ~= currentChannel)) then
 				return
 			end
 			local existingMessageById = environment.messages[data.id]

@@ -4,7 +4,6 @@
 
 return function()
 	local localizationService = game:GetService("LocalizationService")
-	local userShouldLocalizeServerMessages = true
 	local localizationTable,entries = require(script.Parent:WaitForChild("lists"):WaitForChild("localizationTable"))()
 	local userInput = game:GetService("UserInputService")
 	local touchEnabled = userInput.TouchEnabled

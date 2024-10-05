@@ -1,3 +1,7 @@
+-- Author: @Jumpathy
+-- Name: colorPicker.lua
+-- Description: Chat color picker
+
 local controller = function()
 	local hsl_to_rgb = function(h,s,L)
 		h = h/360
